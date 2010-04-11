@@ -1,0 +1,8 @@
+# auto-generated shipit config file.
+steps = FindVersion, ChangeVersion, CheckChangeLog, DistTest, Commit, Tag, MakeDist
+
+git.tagpattern = %v
+git.push_to = release
+
+CheckChangeLog.files = Changes
+MakeDist.destination = ~/code/rtgi/distribs/
