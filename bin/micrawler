@@ -13,7 +13,7 @@ $|=1;
 ### Gestion des params de ligne de commande ###
 my ( $max_depth, $max_pages_count, $max_distance, @seed_urls ) = @ARGV or die( 'need a lot of things ;)' );
 
-print "Picrowler ---\n";
+print "Micrawler ---\n";
 print "max_depth = $max_depth\n";
 print "max_pages_count = $max_pages_count\n";
 print "max_distance = $max_distance\n";
@@ -136,6 +136,10 @@ sub crawler {
         for my $url ( @to_visit ) {
             
             last if( $pages_count >= $max_pages_count );
+
+            # On va calmer le jeu
+            my $sec = sleep( rand( 3 ) );
+            print "... sleeping $sec sec\n";
 
             my $response = $agent->get( $url );
             if( $response->is_success ) {
