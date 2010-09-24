@@ -37,7 +37,7 @@ sub find_or_create_node {
 
 ### Initialisation de LWP ###
 my $agent = LWP::UserAgent->new;
-$agent->agent( 'Picrowler - http://github.com/cmaussan/Picrowler' );
+$agent->agent( 'Micrawler - http://github.com/cmaussan/Micrawler' );
 
 ### Initialisation du scraper ###
 my $scraper = scraper {
