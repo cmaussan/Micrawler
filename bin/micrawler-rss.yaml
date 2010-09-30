@@ -1,0 +1,14 @@
+refresh: 60
+feeds:
+# Le Monde
+  - 'http://twitter.com/statuses/user_timeline/24744541.rss'
+# Libé
+  - 'http://twitter.com/statuses/user_timeline/68440549.rss'
+# Le Figaro
+  - 'http://twitter.com/statuses/user_timeline/8350912.rss'
+# Le Parisien
+  - 'http://twitter.com/statuses/user_timeline/18788465.rss'
+# Rue89
+  - http://twitter.com/statuses/user_timeline/19341180.rss
+# 20 Minutes
+  - http://twitter.com/statuses/user_timeline/2649991.rss

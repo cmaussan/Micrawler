@@ -1,0 +1,38 @@
+#!/usr/bin/env perl
+
+use strict; 
+use warnings;
+
+use Encode;
+use URI;
+use XML::Feed;
+use YAML qw( LoadFile ); # Cf. http://www.yaml.org/
+
+my $config_file = shift or die "You need a config file!\n";
+my $config = LoadFile( $config_file );
+
+my $seen = {}; 
+
+while( 1 == 1 ) {
+
+    for my $feed_url ( @{ $config->{ feeds } } ) {
+        my $feed = XML::Feed->parse( URI->new( $feed_url ) );
+
+        for my $entry ( $feed->entries ) {
+            unless( defined $seen->{ $entry->link } ) {
+                print "--- " . $entry->issued . "---\n";
+                print "| " . encode( 'utf-8', $entry->content->body ) . "\n";
+                $seen->{ $entry->link } = 1;  
+            }
+        }
+
+    }
+
+    sleep( $config->{ refresh } );
+}
+
+
+
+
+
+
