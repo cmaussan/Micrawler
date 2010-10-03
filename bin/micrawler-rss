@@ -5,34 +5,68 @@ use warnings;
 
 use Encode;
 use URI;
+use Text::Trim;
 use XML::Feed;
-use YAML qw( LoadFile ); # Cf. http://www.yaml.org/
+use YAML qw( LoadFile Dump ); # Cf. http://www.yaml.org/
 
+$| = 1;
+
+# Chargement de la config
 my $config_file = shift or die "You need a config file!\n";
 my $config = LoadFile( $config_file );
 
+# Cache des flux tweets déjà vus (le permalien assure l'unicité et est 
+# donc la clé)
 my $seen = {}; 
 
+# Pour toujours :)
 while( 1 == 1 ) {
-
-    for my $feed_url ( @{ $config->{ feeds } } ) {
-        my $feed = XML::Feed->parse( URI->new( $feed_url ) );
-
-        for my $entry ( $feed->entries ) {
-            unless( defined $seen->{ $entry->link } ) {
-                print "--- " . $entry->issued . "---\n";
-                print "| " . encode( 'utf-8', $entry->content->body ) . "\n";
-                $seen->{ $entry->link } = 1;  
-            }
-        }
-
+    print "loading...";
+    my @tweets = refresh_feeds();
+    unless( @tweets ) {
+        print " no tweets !";
     }
-
+    else {
+        print "\r";
+        print_tweets( @tweets );
+    }
     sleep( $config->{ refresh } );
 }
 
+# Renvoie le tableau des nouveaux tweets récupérés depuis les flux et classés 
+# du plus vieux au plus récent
+sub refresh_feeds {
+    my @new_tweets = ();
+    # Pour chacun des flux
+    for my $feed_url ( @{ $config->{ feeds } } ) {
+        my $feed = XML::Feed->parse( URI->new( $feed_url ) );
 
+        if( $feed ) {
+            # Pour chaque nouvelle entrée
+            for my $entry ( $feed->entries ) {
+                # Est-ce qu'on a déjà vu ce tweet ?
+                unless( defined $seen->{ $entry->link } ) {
+                    push @new_tweets, $entry;
+                }
+            }
+        }
+    }
+    @new_tweets = sort { $a->issued <=> $b->issued } @new_tweets;
+    return @new_tweets;   
+}
 
+sub print_tweets {
+    my @tweets = @_;
+
+    for my $tweet ( @tweets ) {
+        my ( $user, $msg ) = split( /\:/, $tweet->content->body, 2 );
+        my $datetime = $tweet->issued;
+        $datetime->set_time_zone( 'Europe/Paris' );
+        print "+--| " . uc( encode( 'utf-8', $user ) ) .  " |--- " . $datetime->hms . " ---\n";
+        print "| " . encode( 'utf-8', trim( $msg ) ) . "\n|\n";
+        $seen->{ $tweet->link } = 1;
+    }
+}
 
 
 
