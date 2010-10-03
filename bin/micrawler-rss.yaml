@@ -1,4 +1,4 @@
-refresh: 60
+refresh: 300
 feeds:
 # Le Monde
   - 'http://twitter.com/statuses/user_timeline/24744541.rss'
