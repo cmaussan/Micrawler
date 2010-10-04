@@ -4,6 +4,7 @@ use strict;
 use warnings;
 
 use Encode;
+use LWP::UserAgent;
 use URI;
 use Text::Trim;
 use XML::Feed;
@@ -39,6 +40,7 @@ sub refresh_feeds {
     my @new_tweets = ();
     # Pour chacun des flux
     for my $feed_url ( @{ $config->{ feeds } } ) {
+        my $parser = XML::Feed->new;
         my $feed = XML::Feed->parse( URI->new( $feed_url ) );
         if( $feed ) {
             # Pour chaque nouvelle entrée
@@ -60,6 +62,11 @@ sub print_tweets {
     for my $tweet ( @tweets ) {
         my ( $user, $msg ) = split( /\:/, $tweet->content->body, 2 );
         my $datetime = $tweet->issued;
+
+        if( $config->{ resolve_url } ) {
+            $msg = resolve_url( $msg );
+        }
+
         $datetime->set_time_zone( 'Europe/Paris' );
         print "+--| " . uc( encode( 'utf-8', $user ) ) .  " |--- " . $datetime->hms . " ---\n";
         print "| " . encode( 'utf-8', trim( $msg ) ) . "\n|\n";
@@ -67,5 +74,28 @@ sub print_tweets {
     }
 }
 
+sub resolve_url {
+    my $msg = shift;
 
+    my $new_msg = $msg;
+
+    # Création du UserAgent
+    my $ua = LWP::UserAgent->new;
+
+    while( $msg =~ /(http\:\/\/[^\s]+)/g ) {
+        my $original_url = $1;
+        my $req = HTTP::Request->new( HEAD => $original_url );
+        my $res = $ua->request( $req );
+        if ( $res->is_success ) {
+            my $url = $res->request->uri;
+            $new_msg =~ s/$original_url/$url/;
+        }
+        else {
+            my $error = "[broken]";
+            $new_msg =~ s/$original_url/$error/;
+        }
+    }
+
+    $new_msg;
+}
 
