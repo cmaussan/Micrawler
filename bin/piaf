@@ -21,7 +21,7 @@ my $seen = {};
 
 # Pour toujours :)
 while( 1 == 1 ) {
-    print "loading...";
+    print "\rloading...";
     my @tweets = refresh_feeds();
     unless( @tweets ) {
         print " no tweets !";
@@ -40,7 +40,6 @@ sub refresh_feeds {
     # Pour chacun des flux
     for my $feed_url ( @{ $config->{ feeds } } ) {
         my $feed = XML::Feed->parse( URI->new( $feed_url ) );
-
         if( $feed ) {
             # Pour chaque nouvelle entrée
             for my $entry ( $feed->entries ) {
