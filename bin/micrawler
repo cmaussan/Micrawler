@@ -42,6 +42,7 @@ $agent->agent( 'Micrawler - http://github.com/cmaussan/Micrawler' );
 ### Initialisation du scraper ###
 my $scraper = scraper {
     process "a", "links[]" => '@href';
+    process "frame", "links[]" => '@src';
 };
 
 my @sites_to_visit = map { $_->canonical->as_string } grep { defined $_ } map { site_uri( $_ ) } @seed_urls;
@@ -93,7 +94,7 @@ sub is_valid {
     my $url = shift;
     my $uri = ( ref $url && ref $url =~ /^URI/ ) ? $url : URI->new( $url );
 
-    if( ref( $uri ) ne 'URI::http' ) {
+    if( ref( $uri ) !~ /^URI::http/ ) {
         warn "[$uri] not valid";
         $uri = undef;
     }
